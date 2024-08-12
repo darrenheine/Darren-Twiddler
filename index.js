@@ -147,7 +147,7 @@ $(document).ready(() => {
   };
 
   // Automatically display new tweets every 2 seconds
-  setInterval(displayTweets, 2000000); // Refresh tweets every 2 seconds
+  setInterval(displayTweets, 2000); // Refresh tweets every 2 seconds
 
   // Display tweets on initial load
   displayTweets();
