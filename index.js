@@ -1,10 +1,8 @@
 $(document).ready(() => {
+  console.log("jQuery is ready!"); // Log to confirm jQuery is loaded
+
+  // Basic setup
   const $body = $("body");
-  $body.html(""); // Clear the body to ensure it’s empty before adding tweets
-
-  let currentView = "home"; // Default view is the home timeline
-
-  // Apply some basic CSS styling
   $body.css({
     "font-family": "Arial, sans-serif",
     "line-height": "1.5",
@@ -12,6 +10,7 @@ $(document).ready(() => {
     padding: "20px",
   });
 
+  // Create tweet input and button elements
   const $tweetInput = $("<input>")
     .attr("placeholder", "What's happening?")
     .css({
@@ -21,6 +20,7 @@ $(document).ready(() => {
       "border-radius": "4px",
       border: "1px solid #ccc",
     });
+
   const $tweetButton = $("<button>").text("Tweet").css({
     padding: "10px 20px",
     "background-color": "#1DA1F2",
@@ -28,141 +28,140 @@ $(document).ready(() => {
     border: "none",
     "border-radius": "4px",
     cursor: "pointer",
+    "margin-left": "10px",
   });
 
-  // Function to display tweets in reverse chronological order
-  const displayTweets = () => {
-    if (currentView !== "home") return; // Set the current view to the home timeline
+  // Create container and append input and button
+  const $tweetInputContainer = $("<div>").css({ "margin-bottom": "20px" });
+  $tweetInputContainer.append($tweetInput, $tweetButton);
+  $body.append($tweetInputContainer);
 
-    $body.html(""); // Clear the body again to refresh the tweets
+  // Create a container to hold the tweets
+  const $tweetsContainer = $("<div>").attr("id", "tweetsContainer");
+  $body.append($tweetsContainer);
 
-    $body.append($tweetInput, $tweetButton); // Add the tweet input and button at the top
+  // Function to add a tweet to the display
+  const addTweetToDisplay = (tweet) => {
+    const $tweet = $("<div></div>").css({
+      "background-color": "#fff",
+      padding: "10px",
+      "margin-bottom": "10px",
+      "border-radius": "4px",
+      "box-shadow": "0 2px 4px rgba(0, 0, 0, 0.1)",
+    });
 
-    const $tweets = streams.home
-      .slice()
-      .reverse()
-      .map((tweet) => {
-        // Reverse the order of tweets
-        const $tweet = $("<div></div>").css({
-          "background-color": "#fff",
-          padding: "10px",
-          "margin-bottom": "10px",
-          "border-radius": "4px",
-          "box-shadow": "0 2px 4px rgba(0, 0, 0, 0.1)",
-        });
+    const $user = $("<span></span>")
+      .text(`@${tweet.user}`)
+      .css("font-weight", "bold")
+      .css("cursor", "pointer");
 
-        const $user = $("<span></span>")
-          .text(`@${tweet.user}`)
-          .css("font-weight", "bold");
+    const $message = $("<span></span>")
+      .text(`: ${tweet.message}`)
+      .css("margin-left", "5px");
 
-        const $message = $("<span></span>")
-          .text(`: ${tweet.message}`)
-          .css("margin-left", "5px");
-
-        const $timestampExact = $("<span></span>")
-          .text(moment(tweet.created_at).format("MMMM Do YYYY, h:mm:ss a"))
-          .css({ "font-style": "italic", "font-size": "0.9em", color: "#555" });
-
-        const $timestampHumanFriendly = $("<span></span>")
-          .text(` (${moment(tweet.created_at).fromNow()})`)
-          .css({
-            "font-style": "italic",
-            "font-size": "0.9em",
-            color: "#999",
-            "margin-left": "5px",
-          });
-
-        $tweet.append($user); // Add the username
-        $tweet.append($message); // Add the message text
-        $tweet.append($timestampExact); // Add exact timestamp
-        $tweet.append($timestampHumanFriendly); // Add human-friendly timestamp
-
-        // Add click event to the username to display user’s timeline
-        $user.on("click", () => {
-          displayUserTimeline(tweet.user);
-        });
-
-        return $tweet; // Return the constructed tweet div
+    const $timestampExact = $("<span></span>")
+      .text(moment(tweet.created_at).format("MMMM Do YYYY, h:mm:ss a"))
+      .css({
+        "font-style": "italic",
+        "font-size": "0.9em",
+        color: "#555",
+        "margin-left": "10px",
       });
 
-    $body.append($tweets); // Append all tweets to the body
+    const $timestampHumanFriendly = $("<span></span>")
+      .text(` (${moment(tweet.created_at).fromNow()})`)
+      .css({
+        "font-style": "italic",
+        "font-size": "0.9em",
+        color: "#999",
+        "margin-left": "5px",
+      });
+
+    $tweet.append($user, $message, $timestampExact, $timestampHumanFriendly);
+    $tweetsContainer.prepend($tweet); // Add the new tweet at the top
+
+    // Add click event to the username to display user’s timeline
+    $user.on("click", () => {
+      displayUserTimeline(tweet.user);
+    });
+  };
+
+  // Function to display all tweets on initial load
+  const displayTweets = () => {
+    $tweetsContainer.empty(); // Clear existing tweets
+    streams.home
+      .slice()
+      .reverse()
+      .forEach((tweet) => {
+        addTweetToDisplay(tweet);
+      });
   };
 
   // Function to display a specific user's timeline
   const displayUserTimeline = (user) => {
-    currentView = user; // Set the current view to the selected user's timeline
-    $body.html(""); // Clear the body to display only the selected user's tweets
-    const userTweets = streams.users[user]
+    currentView = user; // Track the current view
+    $tweetsContainer.empty(); // Clear existing tweets
+
+    streams.users[user]
       .slice()
       .reverse()
-      .map((tweet) => {
-        const $tweet = $("<div></div>").css({
-          "background-color": "#fff",
-          padding: "10px",
-          "margin-bottom": "10px",
-          "border-radius": "4px",
-          "box-shadow": "0 2px 4px rgba(0, 0, 0, 0.1)",
-        });
-
-        const $message = $("<span></span>").text(
-          `@${tweet.user}: ${tweet.message}`
-        );
-        const $timestampExact = $("<span></span>")
-          .text(moment(tweet.created_at).format("MMMM Do YYYY, h:mm:ss a"))
-          .css({ "font-style": "italic", "font-size": "0.9em", color: "#555" });
-
-        const $timestampHumanFriendly = $("<span></span>")
-          .text(` (${moment(tweet.created_at).fromNow()})`)
-          .css({
-            "font-style": "italic",
-            "font-size": "0.9em",
-            color: "#999",
-            "margin-left": "5px",
-          });
-
-        $tweet.append($message);
-        $tweet.append($timestampExact);
-        $tweet.append($timestampHumanFriendly);
-
-        return $tweet; // Return the constructed tweet div
+      .forEach((tweet) => {
+        addTweetToDisplay(tweet);
       });
 
-    $body.append(userTweets); // Append user's tweets to the body
-    $body.append(
-      $("<button>Back to Home</button>")
-        .on("click", () => {
-          currentView = "home"; // Set the current view back to the home timeline
-          displayTweets(); // Refresh the tweet list to display the home timeline
-        })
-        .css({
-          padding: "10px 20px",
-          "background-color": "#1DA1F2",
-          color: "#fff",
-          border: "none",
-          "border-radius": "4px",
-          cursor: "pointer",
-          "margin-top": "20px",
-        })
-    ); // Add a "Back to Home" button
+    // Add a "Back to Home" button
+    const $backButton = $("<button>Back to Home</button>").css({
+      padding: "10px 20px",
+      "background-color": "#1DA1F2",
+      color: "#fff",
+      border: "none",
+      "border-radius": "4px",
+      cursor: "pointer",
+      "margin-top": "20px",
+    });
+
+    $backButton.on("click", () => {
+      currentView = "home"; // Set view to home
+      displayTweets(); // Display home timeline
+    });
+
+    $tweetsContainer.append($backButton);
   };
 
-  // Automatically display new tweets every 2 seconds
-  setInterval(displayTweets, 2000); // Refresh tweets every 2 seconds
-
   // Display tweets on initial load
+  let currentView = "home";
   displayTweets();
 
-  // Allow users to tweet
-  $tweetButton.on("click", () => {
-    const message = $tweetInput.val();
-    if (message.trim()) {
-      window.visitor = "current_user"; // Replace 'current_user' with the actual visitor's username
-      writeTweet(message);
+  // Click event handler for the Tweet button
+  $tweetButton.click(() => {
+    const message = $tweetInput.val().trim();
+    console.log("Tweet button clicked!");
+    console.log("Tweet message: ", message);
+
+    if (message) {
+      const tweet = {
+        user: "douglascalhoun",
+        message: message,
+        created_at: moment().toISOString(),
+      };
+
+      addTweet(tweet); // Add the tweet to the streams data structure
+
+      if (currentView === "home") {
+        addTweetToDisplay(tweet); // Display the new tweet on the screen if on the home timeline
+      }
+
       $tweetInput.val(""); // Clear the input field after tweeting
-      displayTweets(); // Refresh the tweet list to include the new tweet
     }
   });
 
-  $body.append($tweetInput);
-  $body.append($tweetButton);
+  // Function to refresh tweets every 2 seconds
+  const refreshTweets = () => {
+    if (currentView === "home") {
+      displayTweets(); // Refresh the tweet list only if viewing home timeline
+    }
+  };
+
+  // Start the auto-refresh interval
+  setInterval(refreshTweets, 2000);
 });

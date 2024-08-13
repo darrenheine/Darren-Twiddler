@@ -29,11 +29,91 @@ const randomElement = (array) => {
 };
 
 // Random tweet generator
-const opening = ['just', '', '', '', '', 'ask me how i', 'completely', 'nearly', 'productively', 'efficiently', 'last night i', 'the president', 'that wizard', 'a ninja', 'a seedy old man'];
-const verbs = ['downloaded', 'interfaced', 'deployed', 'developed', 'built', 'invented', 'experienced', 'navigated', 'aided', 'enjoyed', 'engineered', 'installed', 'debugged', 'delegated', 'automated', 'formulated', 'systematized', 'overhauled', 'computed'];
-const objects = ['my', 'your', 'the', 'a', 'my', 'an entire', 'this', 'that', 'the', 'the big', 'a new form of'];
-const nouns = ['cat', 'koolaid', 'system', 'city', 'worm', 'cloud', 'potato', 'money', 'way of life', 'belief system', 'security system', 'bad decision', 'future', 'life', 'pony', 'mind'];
-const tags = ['#techlife', '#burningman', '#sf', '#butonlyiknowhow', '#forreal', '#sxsw', '#ballin', '#omg', '#yolo', '#magic', '', '', '', ''];
+const opening = [
+  "just",
+  "",
+  "",
+  "",
+  "",
+  "ask me how i",
+  "completely",
+  "nearly",
+  "productively",
+  "efficiently",
+  "last night i",
+  "the president",
+  "that wizard",
+  "a ninja",
+  "a seedy old man",
+];
+const verbs = [
+  "downloaded",
+  "interfaced",
+  "deployed",
+  "developed",
+  "built",
+  "invented",
+  "experienced",
+  "navigated",
+  "aided",
+  "enjoyed",
+  "engineered",
+  "installed",
+  "debugged",
+  "delegated",
+  "automated",
+  "formulated",
+  "systematized",
+  "overhauled",
+  "computed",
+];
+const objects = [
+  "my",
+  "your",
+  "the",
+  "a",
+  "my",
+  "an entire",
+  "this",
+  "that",
+  "the",
+  "the big",
+  "a new form of",
+];
+const nouns = [
+  "cat",
+  "koolaid",
+  "system",
+  "city",
+  "worm",
+  "cloud",
+  "potato",
+  "money",
+  "way of life",
+  "belief system",
+  "security system",
+  "bad decision",
+  "future",
+  "life",
+  "pony",
+  "mind",
+];
+const tags = [
+  "#techlife",
+  "#burningman",
+  "#sf",
+  "#butonlyiknowhow",
+  "#forreal",
+  "#sxsw",
+  "#ballin",
+  "#omg",
+  "#yolo",
+  "#magic",
+  "",
+  "",
+  "",
+  "",
+];
 
 const randomMessage = () => {
   return [
@@ -42,7 +122,7 @@ const randomMessage = () => {
     randomElement(objects),
     randomElement(nouns),
     randomElement(tags),
-  ].join(' ');
+  ].join(" ");
 };
 
 // Generate random tweets on a random schedule
@@ -67,16 +147,3 @@ scheduleNextTweet();
 
 // Utility function for letting students add "write a tweet" functionality
 // (NOTE: Not used by the rest of this file.)
-const writeTweet = (message) => {
-  const visitor = window.visitor;
-
-  if (!visitor){
-    throw new Error('Set the global visitor property!');
-  }
-
-  const tweet = {
-    user: visitor,
-    message: message,
-  };
-  addTweet(tweet);
-};
